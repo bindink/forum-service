@@ -8,6 +8,8 @@ import telran.java51.accounting.dto.account.UserRegisterDto;
 import telran.java51.accounting.dto.account.UserUpdateDto;
 import telran.java51.accounting.service.AccountService;
 
+import java.util.Base64;
+
 
 @RequiredArgsConstructor
 @RestController
@@ -21,8 +23,10 @@ public class AccountController {
     }
 
     @PostMapping("/login")
-    public UserDto login() {
-        return null;
+    public UserDto login(@RequestHeader("Authorization") String token) {
+        token = token.split(" ")[1];
+        String credentials = new String(Base64.getDecoder().decode(token));
+        return accountService.getUser(credentials.split(":")[0]);
     }
 
     @DeleteMapping("/user/{user}")
