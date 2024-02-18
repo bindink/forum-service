@@ -8,6 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface AccountRepository extends CrudRepository<User, String> {
-    Optional<User> findByLogin (String login);
-    void deleteByLogin (String login);
+//    Optional<User> findByLogin (String login);
+//    void deleteByLogin (String login);
 }

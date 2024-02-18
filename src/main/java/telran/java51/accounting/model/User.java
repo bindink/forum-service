@@ -1,5 +1,6 @@
 package telran.java51.accounting.model;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -17,6 +18,10 @@ public class User {
     String firstName;
     @Setter
     String lastName;
+    @Setter
+    @Getter
+    String password;
+
     Set<Role> roles = new HashSet<>();
 
     public void addRole(Role role) {
