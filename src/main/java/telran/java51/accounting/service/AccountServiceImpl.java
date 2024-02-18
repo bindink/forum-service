@@ -8,18 +8,22 @@ import telran.java51.accounting.dto.account.RoleDto;
 import telran.java51.accounting.dto.account.UserDto;
 import telran.java51.accounting.dto.account.UserRegisterDto;
 import telran.java51.accounting.dto.account.UserUpdateDto;
+import telran.java51.accounting.dto.exceptions.UserAlreadyExistsException;
 import telran.java51.accounting.dto.exceptions.UserNotFoundException;
 import telran.java51.accounting.model.Role;
 import telran.java51.accounting.model.User;
 
 @RequiredArgsConstructor
 @Service
-public class AccountServiceImpl implements AccountService{
+public class AccountServiceImpl implements AccountService {
     final AccountRepository accountRepository;
     final ModelMapper modelMapper;
 
     @Override
     public UserDto registerUser(UserRegisterDto userRegisterDto) {
+        if (accountRepository.findByLogin(userRegisterDto.getLogin()).isPresent()) {
+            throw new UserAlreadyExistsException();
+        }
         User user = modelMapper.map(userRegisterDto, User.class);
         user.addRole(Role.USER);
         accountRepository.save(user);
@@ -27,7 +31,7 @@ public class AccountServiceImpl implements AccountService{
     }
 
     @Override
-    public UserDto deleteUser (String login) {
+    public UserDto deleteUser(String login) {
         User user = accountRepository.findByLogin(login).orElseThrow(UserNotFoundException::new);
         accountRepository.deleteByLogin(login);
         return modelMapper.map(user, UserDto.class);

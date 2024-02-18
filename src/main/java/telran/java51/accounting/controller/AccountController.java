@@ -21,17 +21,17 @@ public class AccountController {
     }
 
     @PostMapping("/login")
-    public UserDto register() {
+    public UserDto login() {
         return null;
     }
 
     @DeleteMapping("/user/{user}")
-    public UserDto register(@PathVariable("user") String login) {
+    public UserDto deleteUser(@PathVariable("user") String login) {
         return accountService.deleteUser(login);
     }
 
     @PutMapping("/user/{user}")
-    public UserDto register(@PathVariable("user") String login, @RequestBody UserUpdateDto userUpdateDto) {
+    public UserDto updateUser(@PathVariable("user") String login, @RequestBody UserUpdateDto userUpdateDto) {
         return accountService.updateUser(login, userUpdateDto);
     }
 
