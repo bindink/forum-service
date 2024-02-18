@@ -17,4 +17,6 @@ public interface AccountService {
     public RoleDto deleteRole(String login, String role);
 
     public UserDto getUser(String login);
+
+    void changePassword(String name, String newPassword);
 }

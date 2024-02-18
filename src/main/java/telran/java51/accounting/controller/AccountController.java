@@ -1,12 +1,15 @@
 package telran.java51.accounting.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import telran.java51.accounting.dto.account.RoleDto;
 import telran.java51.accounting.dto.account.UserDto;
 import telran.java51.accounting.dto.account.UserRegisterDto;
 import telran.java51.accounting.dto.account.UserUpdateDto;
 import telran.java51.accounting.service.AccountService;
+
+import java.security.Principal;
 
 
 @RequiredArgsConstructor
@@ -21,9 +24,16 @@ public class AccountController {
     }
 
     @PostMapping("/login")
-    public UserDto login() {
-        return null;
+    public UserDto login(Principal principal) {
+        return accountService.getUser(principal.getName());
     }
+
+    @PutMapping("/password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changePassword(Principal principal, @RequestHeader("X-Password")String newPassword) {
+       accountService.changePassword(principal.getName(), newPassword);
+    }
+
 
     @DeleteMapping("/user/{user}")
     public UserDto deleteUser(@PathVariable("user") String login) {
