@@ -77,4 +77,12 @@ public class AccountServiceImpl implements AccountService {
         User user = accountRepository.findById(login).orElseThrow(UserNotFoundException::new);
         return modelMapper.map(user, UserDto.class);
     }
+
+    @Override
+    public void changePassword(String login, String newPassword) {
+        User user = accountRepository.findById(login).orElseThrow(UserNotFoundException::new);
+        String password = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+        user.setPassword(password);
+        accountRepository.save(user);
+    }
 }

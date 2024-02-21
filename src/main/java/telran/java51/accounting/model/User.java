@@ -13,6 +13,7 @@ import java.util.Set;
 @Document(collection = "accounts")
 public class User {
     @Id
+    @Getter
     String login;
     @Setter
     String firstName;
