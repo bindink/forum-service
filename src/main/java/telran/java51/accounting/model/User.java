@@ -1,5 +1,6 @@
 package telran.java51.accounting.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import java.util.Set;
 
 @NoArgsConstructor
 @Document(collection = "accounts")
+@AllArgsConstructor
 public class User {
     @Id
     @Getter
@@ -23,6 +25,7 @@ public class User {
     @Getter
     String password;
 
+    @Getter
     Set<Role> roles = new HashSet<>();
 
     public void addRole(Role role) {

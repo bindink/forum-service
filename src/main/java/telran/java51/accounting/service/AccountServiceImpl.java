@@ -3,6 +3,7 @@ package telran.java51.accounting.service;
 import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
 import org.modelmapper.ModelMapper;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import telran.java51.accounting.dao.AccountRepository;
 import telran.java51.accounting.dto.account.RoleDto;
@@ -14,9 +15,14 @@ import telran.java51.accounting.dto.exceptions.UserNotFoundException;
 import telran.java51.accounting.model.Role;
 import telran.java51.accounting.model.User;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
+import static com.fasterxml.jackson.databind.type.LogicalType.Collection;
+
 @RequiredArgsConstructor
 @Service
-public class AccountServiceImpl implements AccountService {
+public class AccountServiceImpl implements AccountService, CommandLineRunner {
     final AccountRepository accountRepository;
     final ModelMapper modelMapper;
 
@@ -84,5 +90,14 @@ public class AccountServiceImpl implements AccountService {
         String password = BCrypt.hashpw(newPassword, BCrypt.gensalt());
         user.setPassword(password);
         accountRepository.save(user);
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        if (!accountRepository.existsById("admin")) {
+            String password = BCrypt.hashpw("admin", BCrypt.gensalt());
+            User admin = new User("admin", "", "", password, new HashSet<>(Arrays.asList(Role.MODERATOR, Role.ADMINISTRATOR )));
+            accountRepository.save(admin);
+        }
     }
 }

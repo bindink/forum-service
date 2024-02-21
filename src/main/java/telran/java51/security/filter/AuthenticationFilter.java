@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import telran.java51.accounting.dao.AccountRepository;
@@ -17,6 +18,7 @@ import java.util.Base64;
 
 @Component
 @RequiredArgsConstructor
+@Order(20)
 public class AuthenticationFilter implements Filter {
     final AccountRepository accountRepository;
 
@@ -51,8 +53,10 @@ public class AuthenticationFilter implements Filter {
     }
 
     private boolean checkEndPoint(String method, String path) {
-        return !HttpMethod.POST.matches(method) && (path.matches("/account/register/?")
-                || path.matches("/posts/\\w*"));
+        return !(
+                (HttpMethod.POST.matches(method) && path.matches("/account/register"))
+                        || path.matches("/forum/posts/\\w+(/\\w+)?")
+        );
     }
 
     private class WrappedRequest extends HttpServletRequestWrapper {
