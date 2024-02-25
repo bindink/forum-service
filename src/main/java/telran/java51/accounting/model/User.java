@@ -28,12 +28,12 @@ public class User {
     @Getter
     Set<Role> roles = new HashSet<>();
 
-    public void addRole(Role role) {
-        roles.add(role);
+    public void addRole(String role) {
+        roles.add(Role.valueOf(role.toUpperCase()));
     }
 
-    public void removeRole(Role role) {
-        roles.remove(role);
+    public void removeRole(String role) {
+        roles.remove(Role.valueOf(role.toUpperCase()));
     }
 
 }

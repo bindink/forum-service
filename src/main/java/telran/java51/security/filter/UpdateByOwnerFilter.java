@@ -18,8 +18,6 @@ import static telran.java51.security.filter.utils.FilterUtils.ERROR_403_RESPONSE
 @RequiredArgsConstructor
 @Order(32)
 public class UpdateByOwnerFilter implements Filter {
-    final AccountRepository accountRepository;
-
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {

@@ -34,7 +34,7 @@ public class AccountServiceImpl implements AccountService, CommandLineRunner {
         User user = modelMapper.map(userRegisterDto, User.class);
         String password = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
         user.setPassword(password);
-        user.addRole(Role.USER);
+        user.addRole("USER");
         accountRepository.save(user);
         return modelMapper.map(user, UserDto.class);
     }
@@ -63,7 +63,7 @@ public class AccountServiceImpl implements AccountService, CommandLineRunner {
     @Override
     public RoleDto addRole(String login, String role) {
         User user = accountRepository.findById(login).orElseThrow(UserNotFoundException::new);
-        user.addRole(Role.valueOf(role.toUpperCase()));
+        user.addRole(role);
         accountRepository.save(user);
         return modelMapper.map(user, RoleDto.class);
     }
@@ -72,7 +72,7 @@ public class AccountServiceImpl implements AccountService, CommandLineRunner {
     public RoleDto deleteRole(String login, String role) {
         User user = accountRepository.findById(login).orElseThrow(UserNotFoundException::new);
         if (!Role.USER.toString().equalsIgnoreCase(role)) {
-            user.removeRole(Role.valueOf(role.toUpperCase()));
+            user.removeRole(role.toUpperCase());
             accountRepository.save(user);
         }
         return modelMapper.map(user, RoleDto.class);

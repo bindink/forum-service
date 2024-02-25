@@ -6,9 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import telran.java51.accounting.dao.AccountRepository;
-import telran.java51.accounting.model.Role;
-import telran.java51.accounting.model.User;
+import telran.java51.security.model.UserPrincipal;
 
 import java.io.IOException;
 
@@ -16,16 +14,14 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Order(30)
 public class AdminManagingRolesFilter implements Filter {
-    final AccountRepository accountRepository;
-
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         if (checkEndPoint(request.getMethod(), request.getServletPath())) {
-            User user = accountRepository.findById(request.getUserPrincipal().getName()).get();
-            if (!user.getRoles().contains(Role.ADMINISTRATOR)) {
+            UserPrincipal user = (UserPrincipal)request.getUserPrincipal();
+            if (!user.getRoles().contains("ADMINISTRATOR")) {
                 response.sendError(403, "Permission denied");
                 return;
             }

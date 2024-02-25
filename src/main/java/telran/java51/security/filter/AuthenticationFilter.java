@@ -11,10 +11,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import telran.java51.accounting.dao.AccountRepository;
 import telran.java51.accounting.model.User;
+import telran.java51.security.model.UserPrincipal;
 
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Base64;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static telran.java51.security.filter.utils.FilterUtils.ERROR_401_RESPONSE_TEXT;
 
@@ -28,7 +31,6 @@ public class AuthenticationFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
-
         if (checkEndPoint(request.getMethod(), request.getServletPath())) {
             User user;
             try {
@@ -42,7 +44,10 @@ public class AuthenticationFilter implements Filter {
                 response.sendError(401, ERROR_401_RESPONSE_TEXT);
                 return;
             }
-            request = new WrappedRequest(request, user.getLogin());
+            Set<String> roles = user.getRoles().stream()
+                    .map(Enum::toString)
+                    .collect(Collectors.toSet());
+            request = new WrappedRequest(request, user.getLogin(), roles);
         }
         filterChain.doFilter(request, response);
     }
@@ -62,15 +67,17 @@ public class AuthenticationFilter implements Filter {
 
     private class WrappedRequest extends HttpServletRequestWrapper {
         private String login;
+        private Set<String> roles;
 
-        public WrappedRequest(HttpServletRequest request, String login) {
+        public WrappedRequest(HttpServletRequest request, String login, Set<String> roles) {
             super(request);
             this.login = login;
+            this.roles = roles;
         }
 
         @Override
         public Principal getUserPrincipal() {
-            return () -> login;
+            return new UserPrincipal(login, roles);
         }
     }
 }
