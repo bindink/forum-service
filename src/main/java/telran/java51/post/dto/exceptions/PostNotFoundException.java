@@ -8,4 +8,8 @@ public class PostNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = -6695760736015419739L;
 
+	public PostNotFoundException() {
+		super("Post not found.");
+	}
+
 }

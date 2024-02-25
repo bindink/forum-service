@@ -7,18 +7,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
-import telran.java51.accounting.dao.AccountRepository;
-import telran.java51.security.filter.utils.FilterUtils;
+import telran.java51.post.dao.PostRepository;
+import telran.java51.post.model.Post;
 
 import java.io.IOException;
 
 import static telran.java51.security.filter.utils.FilterUtils.ERROR_403_RESPONSE_TEXT;
+import static telran.java51.security.filter.utils.FilterUtils.ERROR_POST_NOT_FOUND_RESPONSE_TEXT;
 
 @Component
 @RequiredArgsConstructor
-@Order(32)
-public class UpdateByOwnerFilter implements Filter {
-    final AccountRepository accountRepository;
+@Order(42)
+public class UpdatePostByOwnerFilter implements Filter {
+    final PostRepository postRepository;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
@@ -26,8 +27,16 @@ public class UpdateByOwnerFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         if (checkEndPoint(request.getMethod(), request.getServletPath())) {
-            if (!FilterUtils.isRequestPathUserAuthenticated(request)) {
-                response.sendError(403, ERROR_403_RESPONSE_TEXT);
+            try {
+                String[] arr = request.getServletPath().split("/");
+                String postId = arr[arr.length - 1];
+                Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException(ERROR_POST_NOT_FOUND_RESPONSE_TEXT));
+                String authenticatedUser = request.getUserPrincipal().getName();
+                if (!authenticatedUser.equals(post.getAuthor())) {
+                    throw new RuntimeException(ERROR_403_RESPONSE_TEXT);
+                }
+            } catch (Exception e) {
+                response.sendError(403, e.getMessage());
                 return;
             }
         }
@@ -36,9 +45,7 @@ public class UpdateByOwnerFilter implements Filter {
 
 
     private boolean checkEndPoint(String method, String path) {
-        return HttpMethod.PUT.matches(method) && (path.matches("/account/user/\\w+")
-                || path.matches("/forum/post/\\w+/comment/\\w+"))
-                || (HttpMethod.POST.matches(method) && path.matches("/forum/post/\\w+"));
+        return HttpMethod.PUT.matches(method) && path.matches("/forum/post/\\w+");
     }
 
 }

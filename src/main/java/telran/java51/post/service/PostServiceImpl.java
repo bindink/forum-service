@@ -33,7 +33,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostDto findPostById(String id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException());
+        Post post = postRepository.findById(id).orElseThrow(PostNotFoundException::new);
         return modelMapper.map(post, PostDto.class);
     }
 

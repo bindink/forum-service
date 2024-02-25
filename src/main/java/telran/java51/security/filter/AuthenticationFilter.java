@@ -16,9 +16,11 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.Base64;
 
+import static telran.java51.security.filter.utils.FilterUtils.ERROR_401_RESPONSE_TEXT;
+
 @Component
 @RequiredArgsConstructor
-@Order(20)
+@Order(10)
 public class AuthenticationFilter implements Filter {
     final AccountRepository accountRepository;
 
@@ -37,12 +39,11 @@ public class AuthenticationFilter implements Filter {
                     throw new RuntimeException();
                 }
             } catch (Exception e) {
-                response.sendError(401);
+                response.sendError(401, ERROR_401_RESPONSE_TEXT);
                 return;
             }
             request = new WrappedRequest(request, user.getLogin());
         }
-        request.getUserPrincipal();
         filterChain.doFilter(request, response);
     }
 
