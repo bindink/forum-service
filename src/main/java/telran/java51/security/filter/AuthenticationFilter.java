@@ -11,6 +11,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import telran.java51.accounting.dao.AccountRepository;
 import telran.java51.accounting.model.User;
+import telran.java51.security.context.SecurityContext;
 import telran.java51.security.model.UserPrincipal;
 
 import java.io.IOException;
@@ -26,28 +27,39 @@ import static telran.java51.security.filter.utils.FilterUtils.ERROR_401_RESPONSE
 @Order(10)
 public class AuthenticationFilter implements Filter {
     final AccountRepository accountRepository;
+    final SecurityContext securityContext;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         if (checkEndPoint(request.getMethod(), request.getServletPath())) {
-            User user;
-            try {
-                String[] credentials = getCredentials(request.getHeader("Authorization"));
+            String sessionId = request.getSession().getId();
+            UserPrincipal userPrincipal = securityContext.getUserPrincipalBySessionId(sessionId);
 
-                user = accountRepository.findById(credentials[0]).orElseThrow(RuntimeException::new);
-                if (!BCrypt.checkpw(credentials[1], user.getPassword())) {
-                    throw new RuntimeException();
+            User user;
+            if (userPrincipal == null) {
+
+                try {
+                    String[] credentials = getCredentials(request.getHeader("Authorization"));
+
+                    user = accountRepository.findById(credentials[0]).orElseThrow(RuntimeException::new);
+                    if (!BCrypt.checkpw(credentials[1], user.getPassword())) {
+                        throw new RuntimeException();
+                    }
+                    Set<String> roles = user.getRoles().stream()
+                            .map(Enum::toString)
+                            .collect(Collectors.toSet());
+                    userPrincipal = new UserPrincipal(user.getLogin(),roles);
+                    securityContext.addUserSession(sessionId, userPrincipal);
+                } catch (Exception e) {
+                    response.sendError(401, ERROR_401_RESPONSE_TEXT);
+                    return;
                 }
-            } catch (Exception e) {
-                response.sendError(401, ERROR_401_RESPONSE_TEXT);
-                return;
+                request = new WrappedRequest(request, userPrincipal.getName(), userPrincipal.getRoles());
             }
-            Set<String> roles = user.getRoles().stream()
-                    .map(Enum::toString)
-                    .collect(Collectors.toSet());
-            request = new WrappedRequest(request, user.getLogin(), roles);
+            Set<String> roles = userPrincipal.getRoles();
+            request = new WrappedRequest(request, userPrincipal.getName(), roles);
         }
         filterChain.doFilter(request, response);
     }
