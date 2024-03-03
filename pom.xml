@@ -13,7 +13,7 @@
 	<artifactId>forum-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>forum-service</name>
-	<description>Foeum service</description>
+	<description>Forum service</description>
 	<properties>
 		<java.version>11</java.version>
 	</properties>
@@ -26,6 +26,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -37,11 +41,11 @@
 			<artifactId>modelmapper</artifactId>
 			<version>3.0.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.mindrot</groupId>
-			<artifactId>jbcrypt</artifactId>
-			<version>0.4</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.mindrot</groupId>-->
+<!--			<artifactId>jbcrypt</artifactId>-->
+<!--			<version>0.4</version>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

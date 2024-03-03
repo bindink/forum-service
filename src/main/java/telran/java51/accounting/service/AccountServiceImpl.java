@@ -1,8 +1,9 @@
 package telran.java51.accounting.service;
 
 import lombok.RequiredArgsConstructor;
-import org.mindrot.jbcrypt.BCrypt;
 import org.modelmapper.ModelMapper;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import telran.java51.accounting.dao.AccountRepository;
 import telran.java51.accounting.dto.account.RoleDto;
@@ -16,19 +17,18 @@ import telran.java51.accounting.model.User;
 
 @RequiredArgsConstructor
 @Service
-public class AccountServiceImpl implements AccountService {
+public class AccountServiceImpl implements AccountService, CommandLineRunner {
     final AccountRepository accountRepository;
     final ModelMapper modelMapper;
-
+    final PasswordEncoder passwordEncoder;
     @Override
     public UserDto registerUser(UserRegisterDto userRegisterDto) {
         if (accountRepository.existsById(userRegisterDto.getLogin())) {
             throw new UserExistsException();
         }
         User user = modelMapper.map(userRegisterDto, User.class);
-        String password = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+        String password = passwordEncoder.encode(user.getPassword());
         user.setPassword(password);
-        user.addRole(Role.USER);
         accountRepository.save(user);
         return modelMapper.map(user, UserDto.class);
     }
@@ -57,7 +57,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public RoleDto addRole(String login, String role) {
         User user = accountRepository.findById(login).orElseThrow(UserNotFoundException::new);
-        user.addRole(Role.valueOf(role.toUpperCase()));
+        user.addRole(role);
         accountRepository.save(user);
         return modelMapper.map(user, RoleDto.class);
     }
@@ -66,7 +66,7 @@ public class AccountServiceImpl implements AccountService {
     public RoleDto deleteRole(String login, String role) {
         User user = accountRepository.findById(login).orElseThrow(UserNotFoundException::new);
         if (!Role.USER.toString().equalsIgnoreCase(role)) {
-            user.removeRole(Role.valueOf(role.toUpperCase()));
+            user.removeRole(role);
             accountRepository.save(user);
         }
         return modelMapper.map(user, RoleDto.class);
@@ -81,7 +81,19 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void changePassword(String login, String newPassword) {
         User user = accountRepository.findById(login).orElseThrow(UserNotFoundException::new);
-        user.setPassword(newPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
         accountRepository.save(user);
     }
+
+    @Override
+    public void run(String... args) throws Exception {
+        if (!accountRepository.existsById("admin")) {
+            String password = passwordEncoder.encode("admin");
+            User userAccount = new User("admin", password, "", "");
+            userAccount.addRole("MODERATOR");
+            userAccount.addRole("ADMINISTRATOR");
+            accountRepository.save(userAccount);
+        }
+    }
+
 }
